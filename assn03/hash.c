@@ -1,11 +1,8 @@
 /*
  * hash.c -- hash structure routines
  *
- * Author:        
+ * Author: Ziad Sakr   
  *
- * Date:
- *
- * Modification History:
  *
  */
 
