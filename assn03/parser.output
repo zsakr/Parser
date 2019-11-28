@@ -1,0 +1,3647 @@
+State 13 conflicts: 1 shift/reduce
+State 21 conflicts: 1 reduce/reduce
+State 22 conflicts: 7 shift/reduce, 1 reduce/reduce
+State 24 conflicts: 1 shift/reduce
+State 25 conflicts: 1 shift/reduce
+State 27 conflicts: 1 shift/reduce
+State 39 conflicts: 1 shift/reduce
+State 40 conflicts: 1 shift/reduce
+State 42 conflicts: 1 shift/reduce
+State 53 conflicts: 8 shift/reduce, 1 reduce/reduce
+State 95 conflicts: 3 shift/reduce
+State 97 conflicts: 1 shift/reduce
+State 102 conflicts: 7 shift/reduce, 3 reduce/reduce
+State 106 conflicts: 1 shift/reduce
+State 108 conflicts: 2 shift/reduce
+State 119 conflicts: 1 shift/reduce
+State 159 conflicts: 1 shift/reduce
+State 160 conflicts: 1 shift/reduce
+State 171 conflicts: 2 shift/reduce
+State 172 conflicts: 1 shift/reduce
+State 176 conflicts: 1 shift/reduce
+State 177 conflicts: 2 shift/reduce
+State 180 conflicts: 2 shift/reduce
+State 188 conflicts: 1 shift/reduce
+State 208 conflicts: 7 shift/reduce
+State 211 conflicts: 3 shift/reduce
+State 222 conflicts: 1 shift/reduce
+State 229 conflicts: 7 shift/reduce, 2 reduce/reduce
+State 235 conflicts: 8 shift/reduce, 1 reduce/reduce
+State 248 conflicts: 1 shift/reduce
+State 249 conflicts: 7 shift/reduce
+State 251 conflicts: 8 shift/reduce, 3 reduce/reduce
+State 259 conflicts: 8 shift/reduce, 1 reduce/reduce
+State 260 conflicts: 7 shift/reduce, 1 reduce/reduce
+State 280 conflicts: 7 shift/reduce, 3 reduce/reduce
+
+
+Grammar
+
+    0 $accept: program $end
+
+    1 program: PROGRAM IDENT decl_part body
+
+    2 $@1: %empty
+
+    3 program: PROGRAM error $@1 decl_part body
+
+    4 decl_part: %empty
+    5          | varaibledecl decl_part
+
+    6 $@2: %empty
+
+    7 decl_part: decl_part error $@2 decl_part body
+    8          | procedure decl_part
+    9          | function decl_part
+
+   10 body: BEGINN statement END
+   11     | BEGINN stat END
+
+   12 $@3: %empty
+
+   13 body: error $@3 statement END
+
+   14 stat: %empty
+   15     | statement stat
+
+   16 varaibledecl: IDENT COLON TYPE
+
+   17 $@4: %empty
+
+   18 varaibledecl: IDENT error $@4 COLON TYPE
+   19             | IDENT COMMA varaibledecl
+   20             | IDENT EQ TYPE
+
+   21 TYPE: simpleType
+   22     | IDENT
+   23     | ICONST
+   24     | ARRAY LBRACK INDEX RBRACK OF TYPE
+   25     | RECORD fieldlist END
+
+   26 $@5: %empty
+
+   27 TYPE: TYPE error $@5 TYPE
+
+   28 procedure: PROCEDURE IDENT LPAREN RPAREN decl_part body
+
+   29 $@6: %empty
+
+   30 procedure: PROCEDURE IDENT LPAREN error $@6 RPAREN decl_part body
+   31          | PROCEDURE IDENT LPAREN paramter RPAREN decl_part body
+
+   32 paramter: IDENT COLON parametertype
+   33         | AMP paramter
+   34         | IDENT COMMA paramter
+   35         | AMP IDENT paramter
+   36         | paramter SEMI paramter
+   37         | PROCEDURE IDENT LPAREN paramter RPAREN decl_part body
+
+   38 $@7: %empty
+
+   39 paramter: paramter error $@7 RPAREN decl_part body
+
+   40 parametertype: simpleType
+   41              | IDENT
+
+   42 simpleType: INT
+   43           | FLOAT
+   44           | BOOL
+
+   45 $@8: %empty
+
+   46 simpleType: simpleType error $@8 decl_part body
+
+   47 INDEX: ICONST COLON ICONST
+   48      | ICONST COLON ICONST COMMA INDEX
+
+   49 fieldlist: IDENT COLON TYPE
+   50          | IDENT COMMA fieldlist
+   51          | IDENT fieldlist
+
+   52 function: FUNCTION IDENT LPAREN paramter RPAREN COLON simpleType decl_part body
+   53         | FUNCTION IDENT LPAREN RPAREN COLON simpleType decl_part body
+
+   54 $@9: %empty
+
+   55 function: function error $@9 simpleType decl_part body
+
+   56 statement: %empty
+   57          | assignment
+   58          | subroutinecall
+   59          | return
+   60          | for
+   61          | while
+   62          | if
+   63          | read
+   64          | write
+
+   65 assignment: variable EQ exprssion
+
+   66 $@10: %empty
+
+   67 assignment: variable error $@10 EQ exprssion
+
+   68 subroutinecall: IDENT LPAREN RPAREN
+   69               | IDENT LPAREN exprssion RPAREN
+   70               | IDENT LPAREN exprssion COMMA subroutinecall
+
+   71 return: RETURN exprssion
+
+   72 for: FOR IDENT IN exprssion COLON exprssion statement END
+   73    | FOR IDENT IN exprssion COLON exprssion statement stat END
+
+   74 while: WHILE LPAREN exprssion RPAREN statement END
+   75      | WHILE LPAREN exprssion RPAREN statement stat END
+
+   76 if: IF LPAREN exprssion RPAREN THEN statement END
+   77   | IF LPAREN exprssion RPAREN THEN statement stat END
+   78   | IF LPAREN exprssion RPAREN THEN stat elif END
+   79   | IF LPAREN exprssion RPAREN THEN stat else END
+   80   | IF LPAREN exprssion RPAREN THEN stat elif else END
+
+   81 else: ELSE stat
+
+   82 elif: ELIF LPAREN exprssion RPAREN THEN stat
+   83     | ELIF LPAREN exprssion RPAREN THEN stat elif
+
+   84 write: WRITE LPAREN SCONST RPAREN
+   85      | write SCONST exprloop RPAREN
+
+   86 exprloop: COMMA exprssion exprloop
+   87         | %empty
+
+   88 read: READ LPAREN SCONST COMMA exprloop RPAREN
+
+   89 exprssion: and
+   90          | and DBAR and
+   91          | ICONST
+   92          | IDENT PLUS IDENT
+
+   93 and: logic
+   94    | logic DAMP logic
+
+   95 logic: simple
+   96      | simple GT simple
+   97      | simple GE simple
+   98      | simple ASGN simple
+   99      | simple NE simple
+  100      | simple LE simple
+  101      | simple LT simple
+
+  102 simple: PLUS term
+  103       | MINUS term
+  104       | simple condition
+
+  105 condition: PLUS
+  106          | MINUS term condition
+
+  107 term: factor
+  108     | factor termcond
+
+  109 termcond: STAR factor
+  110         | DIV factor
+
+  111 factor: constant
+  112       | variable
+  113       | subroutinecall
+  114       | LPAREN exprssion RPAREN
+  115       | BANG factor
+
+  116 variable: IDENT
+  117         | IDENT arrayvar
+  118         | IDENT arrayvar recvar
+  119         | IDENT recvar
+
+  120 arrayvar: LBRACK exprssion RBRACK
+  121         | LBRACK avarcond
+
+  122 avarcond: exprssion COMMA avarcond
+  123         | %empty
+
+  124 recvar: DOT variable
+  125       | DOT variable recvar
+
+  126 constant: ICONST
+  127         | FCONST
+  128         | TRUE
+  129         | FALSE
+
+
+Terminals, with rules where they appear
+
+    $end (0) 0
+    error (256) 3 7 13 18 27 30 39 46 55 67
+    AMP (258) 33 35
+    ASGN (259) 98
+    BANG (260) 115
+    COLON (261) 16 18 32 47 48 49 52 53 72 73
+    COMMA (262) 19 34 48 50 70 86 88 122
+    DAMP (263) 94
+    DBAR (264) 90
+    DIV (265) 110
+    DOT (266) 124 125
+    EQ (267) 20 65 67
+    GE (268) 97
+    GT (269) 96
+    LBRACK (270) 24 120 121
+    LE (271) 100
+    LPAREN (272) 28 30 31 37 52 53 68 69 70 74 75 76 77 78 79 80 82 83 84 88 114
+    LT (273) 101
+    MINUS (274) 103 106
+    NE (275) 99
+    PLUS (276) 92 102 105
+    RBRACK (277) 24 120
+    RPAREN (278) 28 30 31 37 39 52 53 68 69 74 75 76 77 78 79 80 82 83 84 85 88 114
+    SEMI (279) 36
+    STAR (280) 109
+    ARRAY (281) 24
+    BEGINN (282) 10 11
+    BOOL (283) 44
+    ELSE (284) 81
+    ELIF (285) 82 83
+    END (286) 10 11 13 25 72 73 74 75 76 77 78 79 80
+    FALSE (287) 129
+    FOR (288) 72 73
+    FLOAT (289) 43
+    FUNCTION (290) 52 53
+    IF (291) 76 77 78 79 80
+    IN (292) 72 73
+    INT (293) 42
+    OF (294) 24
+    PROCEDURE (295) 28 30 31 37
+    PROGRAM (296) 1 3
+    READ (297) 88
+    RECORD (298) 25
+    RETURN (299) 71
+    THEN (300) 76 77 78 79 80 82 83
+    TRUE (301) 128
+    WHILE (302) 74 75
+    WRITE (303) 84
+    FCONST (304) 127
+    ICONST (305) 23 47 48 91 126
+    IDENT (306) 1 16 18 19 20 22 28 30 31 32 34 35 37 41 49 50 51 52 53 68 69 70 72 73 92 116 117 118 119
+    SCONST (307) 84 85 88
+
+
+Nonterminals, with rules where they appear
+
+    $accept (53)
+        on left: 0
+    program (54)
+        on left: 1 3
+        on right: 0
+    $@1 (55)
+        on left: 2
+        on right: 3
+    decl_part (56)
+        on left: 4 5 7 8 9
+        on right: 1 3 5 7 8 9 28 30 31 37 39 46 52 53 55
+    $@2 (57)
+        on left: 6
+        on right: 7
+    body (58)
+        on left: 10 11 13
+        on right: 1 3 7 28 30 31 37 39 46 52 53 55
+    $@3 (59)
+        on left: 12
+        on right: 13
+    stat (60)
+        on left: 14 15
+        on right: 11 15 73 75 77 78 79 80 81 82 83
+    varaibledecl (61)
+        on left: 16 18 19 20
+        on right: 5 19
+    $@4 (62)
+        on left: 17
+        on right: 18
+    TYPE (63)
+        on left: 21 22 23 24 25 27
+        on right: 16 18 20 24 27 49
+    $@5 (64)
+        on left: 26
+        on right: 27
+    procedure (65)
+        on left: 28 30 31
+        on right: 8
+    $@6 (66)
+        on left: 29
+        on right: 30
+    paramter (67)
+        on left: 32 33 34 35 36 37 39
+        on right: 31 33 34 35 36 37 39 52
+    $@7 (68)
+        on left: 38
+        on right: 39
+    parametertype (69)
+        on left: 40 41
+        on right: 32
+    simpleType (70)
+        on left: 42 43 44 46
+        on right: 21 40 46 52 53 55
+    $@8 (71)
+        on left: 45
+        on right: 46
+    INDEX (72)
+        on left: 47 48
+        on right: 24 48
+    fieldlist (73)
+        on left: 49 50 51
+        on right: 25 50 51
+    function (74)
+        on left: 52 53 55
+        on right: 9 55
+    $@9 (75)
+        on left: 54
+        on right: 55
+    statement (76)
+        on left: 56 57 58 59 60 61 62 63 64
+        on right: 10 13 15 72 73 74 75 76 77
+    assignment (77)
+        on left: 65 67
+        on right: 57
+    $@10 (78)
+        on left: 66
+        on right: 67
+    subroutinecall (79)
+        on left: 68 69 70
+        on right: 58 70 113
+    return (80)
+        on left: 71
+        on right: 59
+    for (81)
+        on left: 72 73
+        on right: 60
+    while (82)
+        on left: 74 75
+        on right: 61
+    if (83)
+        on left: 76 77 78 79 80
+        on right: 62
+    else (84)
+        on left: 81
+        on right: 79 80
+    elif (85)
+        on left: 82 83
+        on right: 78 80 83
+    write (86)
+        on left: 84 85
+        on right: 64 85
+    exprloop (87)
+        on left: 86 87
+        on right: 85 86 88
+    read (88)
+        on left: 88
+        on right: 63
+    exprssion (89)
+        on left: 89 90 91 92
+        on right: 65 67 69 70 71 72 73 74 75 76 77 78 79 80 82 83 86 114 120 122
+    and (90)
+        on left: 93 94
+        on right: 89 90
+    logic (91)
+        on left: 95 96 97 98 99 100 101
+        on right: 93 94
+    simple (92)
+        on left: 102 103 104
+        on right: 95 96 97 98 99 100 101 104
+    condition (93)
+        on left: 105 106
+        on right: 104 106
+    term (94)
+        on left: 107 108
+        on right: 102 103 106
+    termcond (95)
+        on left: 109 110
+        on right: 108
+    factor (96)
+        on left: 111 112 113 114 115
+        on right: 107 108 109 110 115
+    variable (97)
+        on left: 116 117 118 119
+        on right: 65 67 112 124 125
+    arrayvar (98)
+        on left: 120 121
+        on right: 117 118
+    avarcond (99)
+        on left: 122 123
+        on right: 121 122
+    recvar (100)
+        on left: 124 125
+        on right: 118 119 125
+    constant (101)
+        on left: 126 127 128 129
+        on right: 111
+
+
+State 0
+
+    0 $accept: . program $end
+
+    PROGRAM  shift, and go to state 1
+
+    program  go to state 2
+
+
+State 1
+
+    1 program: PROGRAM . IDENT decl_part body
+    3        | PROGRAM . error $@1 decl_part body
+
+    error  shift, and go to state 3
+    IDENT  shift, and go to state 4
+
+
+State 2
+
+    0 $accept: program . $end
+
+    $end  shift, and go to state 5
+
+
+State 3
+
+    3 program: PROGRAM error . $@1 decl_part body
+
+    $default  reduce using rule 2 ($@1)
+
+    $@1  go to state 6
+
+
+State 4
+
+    1 program: PROGRAM IDENT . decl_part body
+
+    FUNCTION   shift, and go to state 7
+    PROCEDURE  shift, and go to state 8
+    IDENT      shift, and go to state 9
+
+    $default  reduce using rule 4 (decl_part)
+
+    decl_part     go to state 10
+    varaibledecl  go to state 11
+    procedure     go to state 12
+    function      go to state 13
+
+
+State 5
+
+    0 $accept: program $end .
+
+    $default  accept
+
+
+State 6
+
+    3 program: PROGRAM error $@1 . decl_part body
+
+    FUNCTION   shift, and go to state 7
+    PROCEDURE  shift, and go to state 8
+    IDENT      shift, and go to state 9
+
+    $default  reduce using rule 4 (decl_part)
+
+    decl_part     go to state 14
+    varaibledecl  go to state 11
+    procedure     go to state 12
+    function      go to state 13
+
+
+State 7
+
+   52 function: FUNCTION . IDENT LPAREN paramter RPAREN COLON simpleType decl_part body
+   53         | FUNCTION . IDENT LPAREN RPAREN COLON simpleType decl_part body
+
+    IDENT  shift, and go to state 15
+
+
+State 8
+
+   28 procedure: PROCEDURE . IDENT LPAREN RPAREN decl_part body
+   30          | PROCEDURE . IDENT LPAREN error $@6 RPAREN decl_part body
+   31          | PROCEDURE . IDENT LPAREN paramter RPAREN decl_part body
+
+    IDENT  shift, and go to state 16
+
+
+State 9
+
+   16 varaibledecl: IDENT . COLON TYPE
+   18             | IDENT . error $@4 COLON TYPE
+   19             | IDENT . COMMA varaibledecl
+   20             | IDENT . EQ TYPE
+
+    error  shift, and go to state 17
+    COLON  shift, and go to state 18
+    COMMA  shift, and go to state 19
+    EQ     shift, and go to state 20
+
+
+State 10
+
+    1 program: PROGRAM IDENT decl_part . body
+    7 decl_part: decl_part . error $@2 decl_part body
+
+    error   shift, and go to state 21
+    BEGINN  shift, and go to state 22
+
+    body  go to state 23
+
+
+State 11
+
+    5 decl_part: varaibledecl . decl_part
+
+    FUNCTION   shift, and go to state 7
+    PROCEDURE  shift, and go to state 8
+    IDENT      shift, and go to state 9
+
+    $default  reduce using rule 4 (decl_part)
+
+    decl_part     go to state 24
+    varaibledecl  go to state 11
+    procedure     go to state 12
+    function      go to state 13
+
+
+State 12
+
+    8 decl_part: procedure . decl_part
+
+    FUNCTION   shift, and go to state 7
+    PROCEDURE  shift, and go to state 8
+    IDENT      shift, and go to state 9
+
+    $default  reduce using rule 4 (decl_part)
+
+    decl_part     go to state 25
+    varaibledecl  go to state 11
+    procedure     go to state 12
+    function      go to state 13
+
+
+State 13
+
+    9 decl_part: function . decl_part
+   55 function: function . error $@9 simpleType decl_part body
+
+    error      shift, and go to state 26
+    FUNCTION   shift, and go to state 7
+    PROCEDURE  shift, and go to state 8
+    IDENT      shift, and go to state 9
+
+    error   [reduce using rule 4 (decl_part)]
+    BEGINN  reduce using rule 4 (decl_part)
+
+    decl_part     go to state 27
+    varaibledecl  go to state 11
+    procedure     go to state 12
+    function      go to state 13
+
+
+State 14
+
+    3 program: PROGRAM error $@1 decl_part . body
+    7 decl_part: decl_part . error $@2 decl_part body
+
+    error   shift, and go to state 21
+    BEGINN  shift, and go to state 22
+
+    body  go to state 28
+
+
+State 15
+
+   52 function: FUNCTION IDENT . LPAREN paramter RPAREN COLON simpleType decl_part body
+   53         | FUNCTION IDENT . LPAREN RPAREN COLON simpleType decl_part body
+
+    LPAREN  shift, and go to state 29
+
+
+State 16
+
+   28 procedure: PROCEDURE IDENT . LPAREN RPAREN decl_part body
+   30          | PROCEDURE IDENT . LPAREN error $@6 RPAREN decl_part body
+   31          | PROCEDURE IDENT . LPAREN paramter RPAREN decl_part body
+
+    LPAREN  shift, and go to state 30
+
+
+State 17
+
+   18 varaibledecl: IDENT error . $@4 COLON TYPE
+
+    $default  reduce using rule 17 ($@4)
+
+    $@4  go to state 31
+
+
+State 18
+
+   16 varaibledecl: IDENT COLON . TYPE
+
+    ARRAY   shift, and go to state 32
+    BOOL    shift, and go to state 33
+    FLOAT   shift, and go to state 34
+    INT     shift, and go to state 35
+    RECORD  shift, and go to state 36
+    ICONST  shift, and go to state 37
+    IDENT   shift, and go to state 38
+
+    TYPE        go to state 39
+    simpleType  go to state 40
+
+
+State 19
+
+   19 varaibledecl: IDENT COMMA . varaibledecl
+
+    IDENT  shift, and go to state 9
+
+    varaibledecl  go to state 41
+
+
+State 20
+
+   20 varaibledecl: IDENT EQ . TYPE
+
+    ARRAY   shift, and go to state 32
+    BOOL    shift, and go to state 33
+    FLOAT   shift, and go to state 34
+    INT     shift, and go to state 35
+    RECORD  shift, and go to state 36
+    ICONST  shift, and go to state 37
+    IDENT   shift, and go to state 38
+
+    TYPE        go to state 42
+    simpleType  go to state 40
+
+
+State 21
+
+    7 decl_part: decl_part error . $@2 decl_part body
+   13 body: error . $@3 statement END
+
+    error      reduce using rule 6 ($@2)
+    BEGINN     reduce using rule 6 ($@2)
+    FUNCTION   reduce using rule 6 ($@2)
+    PROCEDURE  reduce using rule 6 ($@2)
+    IDENT      reduce using rule 6 ($@2)
+    IDENT      [reduce using rule 12 ($@3)]
+    $default   reduce using rule 12 ($@3)
+
+    $@2  go to state 43
+    $@3  go to state 44
+
+
+State 22
+
+   10 body: BEGINN . statement END
+   11     | BEGINN . stat END
+
+    FOR     shift, and go to state 45
+    IF      shift, and go to state 46
+    READ    shift, and go to state 47
+    RETURN  shift, and go to state 48
+    WHILE   shift, and go to state 49
+    WRITE   shift, and go to state 50
+    IDENT   shift, and go to state 51
+
+    END       reduce using rule 14 (stat)
+    END       [reduce using rule 56 (statement)]
+    FOR       [reduce using rule 56 (statement)]
+    IF        [reduce using rule 56 (statement)]
+    READ      [reduce using rule 56 (statement)]
+    RETURN    [reduce using rule 56 (statement)]
+    WHILE     [reduce using rule 56 (statement)]
+    WRITE     [reduce using rule 56 (statement)]
+    IDENT     [reduce using rule 56 (statement)]
+    $default  reduce using rule 14 (stat)
+
+    stat            go to state 52
+    statement       go to state 53
+    assignment      go to state 54
+    subroutinecall  go to state 55
+    return          go to state 56
+    for             go to state 57
+    while           go to state 58
+    if              go to state 59
+    write           go to state 60
+    read            go to state 61
+    variable        go to state 62
+
+
+State 23
+
+    1 program: PROGRAM IDENT decl_part body .
+
+    $default  reduce using rule 1 (program)
+
+
+State 24
+
+    5 decl_part: varaibledecl decl_part .
+    7          | decl_part . error $@2 decl_part body
+
+    error  shift, and go to state 63
+
+    error   [reduce using rule 5 (decl_part)]
+    BEGINN  reduce using rule 5 (decl_part)
+
+
+State 25
+
+    7 decl_part: decl_part . error $@2 decl_part body
+    8          | procedure decl_part .
+
+    error  shift, and go to state 63
+
+    error   [reduce using rule 8 (decl_part)]
+    BEGINN  reduce using rule 8 (decl_part)
+
+
+State 26
+
+   55 function: function error . $@9 simpleType decl_part body
+
+    $default  reduce using rule 54 ($@9)
+
+    $@9  go to state 64
+
+
+State 27
+
+    7 decl_part: decl_part . error $@2 decl_part body
+    9          | function decl_part .
+
+    error  shift, and go to state 63
+
+    error   [reduce using rule 9 (decl_part)]
+    BEGINN  reduce using rule 9 (decl_part)
+
+
+State 28
+
+    3 program: PROGRAM error $@1 decl_part body .
+
+    $default  reduce using rule 3 (program)
+
+
+State 29
+
+   52 function: FUNCTION IDENT LPAREN . paramter RPAREN COLON simpleType decl_part body
+   53         | FUNCTION IDENT LPAREN . RPAREN COLON simpleType decl_part body
+
+    AMP        shift, and go to state 65
+    RPAREN     shift, and go to state 66
+    PROCEDURE  shift, and go to state 67
+    IDENT      shift, and go to state 68
+
+    paramter  go to state 69
+
+
+State 30
+
+   28 procedure: PROCEDURE IDENT LPAREN . RPAREN decl_part body
+   30          | PROCEDURE IDENT LPAREN . error $@6 RPAREN decl_part body
+   31          | PROCEDURE IDENT LPAREN . paramter RPAREN decl_part body
+
+    error      shift, and go to state 70
+    AMP        shift, and go to state 65
+    RPAREN     shift, and go to state 71
+    PROCEDURE  shift, and go to state 67
+    IDENT      shift, and go to state 68
+
+    paramter  go to state 72
+
+
+State 31
+
+   18 varaibledecl: IDENT error $@4 . COLON TYPE
+
+    COLON  shift, and go to state 73
+
+
+State 32
+
+   24 TYPE: ARRAY . LBRACK INDEX RBRACK OF TYPE
+
+    LBRACK  shift, and go to state 74
+
+
+State 33
+
+   44 simpleType: BOOL .
+
+    $default  reduce using rule 44 (simpleType)
+
+
+State 34
+
+   43 simpleType: FLOAT .
+
+    $default  reduce using rule 43 (simpleType)
+
+
+State 35
+
+   42 simpleType: INT .
+
+    $default  reduce using rule 42 (simpleType)
+
+
+State 36
+
+   25 TYPE: RECORD . fieldlist END
+
+    IDENT  shift, and go to state 75
+
+    fieldlist  go to state 76
+
+
+State 37
+
+   23 TYPE: ICONST .
+
+    $default  reduce using rule 23 (TYPE)
+
+
+State 38
+
+   22 TYPE: IDENT .
+
+    $default  reduce using rule 22 (TYPE)
+
+
+State 39
+
+   16 varaibledecl: IDENT COLON TYPE .
+   27 TYPE: TYPE . error $@5 TYPE
+
+    error  shift, and go to state 77
+
+    error      [reduce using rule 16 (varaibledecl)]
+    BEGINN     reduce using rule 16 (varaibledecl)
+    FUNCTION   reduce using rule 16 (varaibledecl)
+    PROCEDURE  reduce using rule 16 (varaibledecl)
+    IDENT      reduce using rule 16 (varaibledecl)
+
+
+State 40
+
+   21 TYPE: simpleType .
+   46 simpleType: simpleType . error $@8 decl_part body
+
+    error  shift, and go to state 78
+
+    error      [reduce using rule 21 (TYPE)]
+    BEGINN     reduce using rule 21 (TYPE)
+    END        reduce using rule 21 (TYPE)
+    FUNCTION   reduce using rule 21 (TYPE)
+    PROCEDURE  reduce using rule 21 (TYPE)
+    IDENT      reduce using rule 21 (TYPE)
+
+
+State 41
+
+   19 varaibledecl: IDENT COMMA varaibledecl .
+
+    $default  reduce using rule 19 (varaibledecl)
+
+
+State 42
+
+   20 varaibledecl: IDENT EQ TYPE .
+   27 TYPE: TYPE . error $@5 TYPE
+
+    error  shift, and go to state 77
+
+    error      [reduce using rule 20 (varaibledecl)]
+    BEGINN     reduce using rule 20 (varaibledecl)
+    FUNCTION   reduce using rule 20 (varaibledecl)
+    PROCEDURE  reduce using rule 20 (varaibledecl)
+    IDENT      reduce using rule 20 (varaibledecl)
+
+
+State 43
+
+    7 decl_part: decl_part error $@2 . decl_part body
+
+    FUNCTION   shift, and go to state 7
+    PROCEDURE  shift, and go to state 8
+    IDENT      shift, and go to state 9
+
+    $default  reduce using rule 4 (decl_part)
+
+    decl_part     go to state 79
+    varaibledecl  go to state 11
+    procedure     go to state 12
+    function      go to state 13
+
+
+State 44
+
+   13 body: error $@3 . statement END
+
+    FOR     shift, and go to state 45
+    IF      shift, and go to state 46
+    READ    shift, and go to state 47
+    RETURN  shift, and go to state 48
+    WHILE   shift, and go to state 49
+    WRITE   shift, and go to state 50
+    IDENT   shift, and go to state 51
+
+    $default  reduce using rule 56 (statement)
+
+    statement       go to state 80
+    assignment      go to state 54
+    subroutinecall  go to state 55
+    return          go to state 56
+    for             go to state 57
+    while           go to state 58
+    if              go to state 59
+    write           go to state 60
+    read            go to state 61
+    variable        go to state 62
+
+
+State 45
+
+   72 for: FOR . IDENT IN exprssion COLON exprssion statement END
+   73    | FOR . IDENT IN exprssion COLON exprssion statement stat END
+
+    IDENT  shift, and go to state 81
+
+
+State 46
+
+   76 if: IF . LPAREN exprssion RPAREN THEN statement END
+   77   | IF . LPAREN exprssion RPAREN THEN statement stat END
+   78   | IF . LPAREN exprssion RPAREN THEN stat elif END
+   79   | IF . LPAREN exprssion RPAREN THEN stat else END
+   80   | IF . LPAREN exprssion RPAREN THEN stat elif else END
+
+    LPAREN  shift, and go to state 82
+
+
+State 47
+
+   88 read: READ . LPAREN SCONST COMMA exprloop RPAREN
+
+    LPAREN  shift, and go to state 83
+
+
+State 48
+
+   71 return: RETURN . exprssion
+
+    MINUS   shift, and go to state 84
+    PLUS    shift, and go to state 85
+    ICONST  shift, and go to state 86
+    IDENT   shift, and go to state 87
+
+    exprssion  go to state 88
+    and        go to state 89
+    logic      go to state 90
+    simple     go to state 91
+
+
+State 49
+
+   74 while: WHILE . LPAREN exprssion RPAREN statement END
+   75      | WHILE . LPAREN exprssion RPAREN statement stat END
+
+    LPAREN  shift, and go to state 92
+
+
+State 50
+
+   84 write: WRITE . LPAREN SCONST RPAREN
+
+    LPAREN  shift, and go to state 93
+
+
+State 51
+
+   68 subroutinecall: IDENT . LPAREN RPAREN
+   69               | IDENT . LPAREN exprssion RPAREN
+   70               | IDENT . LPAREN exprssion COMMA subroutinecall
+  116 variable: IDENT .
+  117         | IDENT . arrayvar
+  118         | IDENT . arrayvar recvar
+  119         | IDENT . recvar
+
+    DOT     shift, and go to state 94
+    LBRACK  shift, and go to state 95
+    LPAREN  shift, and go to state 96
+
+    $default  reduce using rule 116 (variable)
+
+    arrayvar  go to state 97
+    recvar    go to state 98
+
+
+State 52
+
+   11 body: BEGINN stat . END
+
+    END  shift, and go to state 99
+
+
+State 53
+
+   10 body: BEGINN statement . END
+   15 stat: statement . stat
+
+    END     shift, and go to state 100
+    FOR     shift, and go to state 45
+    IF      shift, and go to state 46
+    READ    shift, and go to state 47
+    RETURN  shift, and go to state 48
+    WHILE   shift, and go to state 49
+    WRITE   shift, and go to state 50
+    IDENT   shift, and go to state 51
+
+    END     [reduce using rule 14 (stat)]
+    END     [reduce using rule 56 (statement)]
+    FOR     [reduce using rule 56 (statement)]
+    IF      [reduce using rule 56 (statement)]
+    READ    [reduce using rule 56 (statement)]
+    RETURN  [reduce using rule 56 (statement)]
+    WHILE   [reduce using rule 56 (statement)]
+    WRITE   [reduce using rule 56 (statement)]
+    IDENT   [reduce using rule 56 (statement)]
+
+    stat            go to state 101
+    statement       go to state 102
+    assignment      go to state 54
+    subroutinecall  go to state 55
+    return          go to state 56
+    for             go to state 57
+    while           go to state 58
+    if              go to state 59
+    write           go to state 60
+    read            go to state 61
+    variable        go to state 62
+
+
+State 54
+
+   57 statement: assignment .
+
+    $default  reduce using rule 57 (statement)
+
+
+State 55
+
+   58 statement: subroutinecall .
+
+    $default  reduce using rule 58 (statement)
+
+
+State 56
+
+   59 statement: return .
+
+    $default  reduce using rule 59 (statement)
+
+
+State 57
+
+   60 statement: for .
+
+    $default  reduce using rule 60 (statement)
+
+
+State 58
+
+   61 statement: while .
+
+    $default  reduce using rule 61 (statement)
+
+
+State 59
+
+   62 statement: if .
+
+    $default  reduce using rule 62 (statement)
+
+
+State 60
+
+   64 statement: write .
+   85 write: write . SCONST exprloop RPAREN
+
+    SCONST  shift, and go to state 103
+
+    $default  reduce using rule 64 (statement)
+
+
+State 61
+
+   63 statement: read .
+
+    $default  reduce using rule 63 (statement)
+
+
+State 62
+
+   65 assignment: variable . EQ exprssion
+   67           | variable . error $@10 EQ exprssion
+
+    error  shift, and go to state 104
+    EQ     shift, and go to state 105
+
+
+State 63
+
+    7 decl_part: decl_part error . $@2 decl_part body
+
+    $default  reduce using rule 6 ($@2)
+
+    $@2  go to state 43
+
+
+State 64
+
+   55 function: function error $@9 . simpleType decl_part body
+
+    BOOL   shift, and go to state 33
+    FLOAT  shift, and go to state 34
+    INT    shift, and go to state 35
+
+    simpleType  go to state 106
+
+
+State 65
+
+   33 paramter: AMP . paramter
+   35         | AMP . IDENT paramter
+
+    AMP        shift, and go to state 65
+    PROCEDURE  shift, and go to state 67
+    IDENT      shift, and go to state 107
+
+    paramter  go to state 108
+
+
+State 66
+
+   53 function: FUNCTION IDENT LPAREN RPAREN . COLON simpleType decl_part body
+
+    COLON  shift, and go to state 109
+
+
+State 67
+
+   37 paramter: PROCEDURE . IDENT LPAREN paramter RPAREN decl_part body
+
+    IDENT  shift, and go to state 110
+
+
+State 68
+
+   32 paramter: IDENT . COLON parametertype
+   34         | IDENT . COMMA paramter
+
+    COLON  shift, and go to state 111
+    COMMA  shift, and go to state 112
+
+
+State 69
+
+   36 paramter: paramter . SEMI paramter
+   39         | paramter . error $@7 RPAREN decl_part body
+   52 function: FUNCTION IDENT LPAREN paramter . RPAREN COLON simpleType decl_part body
+
+    error   shift, and go to state 113
+    RPAREN  shift, and go to state 114
+    SEMI    shift, and go to state 115
+
+
+State 70
+
+   30 procedure: PROCEDURE IDENT LPAREN error . $@6 RPAREN decl_part body
+
+    $default  reduce using rule 29 ($@6)
+
+    $@6  go to state 116
+
+
+State 71
+
+   28 procedure: PROCEDURE IDENT LPAREN RPAREN . decl_part body
+
+    FUNCTION   shift, and go to state 7
+    PROCEDURE  shift, and go to state 8
+    IDENT      shift, and go to state 9
+
+    $default  reduce using rule 4 (decl_part)
+
+    decl_part     go to state 117
+    varaibledecl  go to state 11
+    procedure     go to state 12
+    function      go to state 13
+
+
+State 72
+
+   31 procedure: PROCEDURE IDENT LPAREN paramter . RPAREN decl_part body
+   36 paramter: paramter . SEMI paramter
+   39         | paramter . error $@7 RPAREN decl_part body
+
+    error   shift, and go to state 113
+    RPAREN  shift, and go to state 118
+    SEMI    shift, and go to state 115
+
+
+State 73
+
+   18 varaibledecl: IDENT error $@4 COLON . TYPE
+
+    ARRAY   shift, and go to state 32
+    BOOL    shift, and go to state 33
+    FLOAT   shift, and go to state 34
+    INT     shift, and go to state 35
+    RECORD  shift, and go to state 36
+    ICONST  shift, and go to state 37
+    IDENT   shift, and go to state 38
+
+    TYPE        go to state 119
+    simpleType  go to state 40
+
+
+State 74
+
+   24 TYPE: ARRAY LBRACK . INDEX RBRACK OF TYPE
+
+    ICONST  shift, and go to state 120
+
+    INDEX  go to state 121
+
+
+State 75
+
+   49 fieldlist: IDENT . COLON TYPE
+   50          | IDENT . COMMA fieldlist
+   51          | IDENT . fieldlist
+
+    COLON  shift, and go to state 122
+    COMMA  shift, and go to state 123
+    IDENT  shift, and go to state 75
+
+    fieldlist  go to state 124
+
+
+State 76
+
+   25 TYPE: RECORD fieldlist . END
+
+    END  shift, and go to state 125
+
+
+State 77
+
+   27 TYPE: TYPE error . $@5 TYPE
+
+    $default  reduce using rule 26 ($@5)
+
+    $@5  go to state 126
+
+
+State 78
+
+   46 simpleType: simpleType error . $@8 decl_part body
+
+    $default  reduce using rule 45 ($@8)
+
+    $@8  go to state 127
+
+
+State 79
+
+    7 decl_part: decl_part . error $@2 decl_part body
+    7          | decl_part error $@2 decl_part . body
+
+    error   shift, and go to state 21
+    BEGINN  shift, and go to state 22
+
+    body  go to state 128
+
+
+State 80
+
+   13 body: error $@3 statement . END
+
+    END  shift, and go to state 129
+
+
+State 81
+
+   72 for: FOR IDENT . IN exprssion COLON exprssion statement END
+   73    | FOR IDENT . IN exprssion COLON exprssion statement stat END
+
+    IN  shift, and go to state 130
+
+
+State 82
+
+   76 if: IF LPAREN . exprssion RPAREN THEN statement END
+   77   | IF LPAREN . exprssion RPAREN THEN statement stat END
+   78   | IF LPAREN . exprssion RPAREN THEN stat elif END
+   79   | IF LPAREN . exprssion RPAREN THEN stat else END
+   80   | IF LPAREN . exprssion RPAREN THEN stat elif else END
+
+    MINUS   shift, and go to state 84
+    PLUS    shift, and go to state 85
+    ICONST  shift, and go to state 86
+    IDENT   shift, and go to state 87
+
+    exprssion  go to state 131
+    and        go to state 89
+    logic      go to state 90
+    simple     go to state 91
+
+
+State 83
+
+   88 read: READ LPAREN . SCONST COMMA exprloop RPAREN
+
+    SCONST  shift, and go to state 132
+
+
+State 84
+
+  103 simple: MINUS . term
+
+    BANG    shift, and go to state 133
+    LPAREN  shift, and go to state 134
+    FALSE   shift, and go to state 135
+    TRUE    shift, and go to state 136
+    FCONST  shift, and go to state 137
+    ICONST  shift, and go to state 138
+    IDENT   shift, and go to state 51
+
+    subroutinecall  go to state 139
+    term            go to state 140
+    factor          go to state 141
+    variable        go to state 142
+    constant        go to state 143
+
+
+State 85
+
+  102 simple: PLUS . term
+
+    BANG    shift, and go to state 133
+    LPAREN  shift, and go to state 134
+    FALSE   shift, and go to state 135
+    TRUE    shift, and go to state 136
+    FCONST  shift, and go to state 137
+    ICONST  shift, and go to state 138
+    IDENT   shift, and go to state 51
+
+    subroutinecall  go to state 139
+    term            go to state 144
+    factor          go to state 141
+    variable        go to state 142
+    constant        go to state 143
+
+
+State 86
+
+   91 exprssion: ICONST .
+
+    $default  reduce using rule 91 (exprssion)
+
+
+State 87
+
+   92 exprssion: IDENT . PLUS IDENT
+
+    PLUS  shift, and go to state 145
+
+
+State 88
+
+   71 return: RETURN exprssion .
+
+    $default  reduce using rule 71 (return)
+
+
+State 89
+
+   89 exprssion: and .
+   90          | and . DBAR and
+
+    DBAR  shift, and go to state 146
+
+    $default  reduce using rule 89 (exprssion)
+
+
+State 90
+
+   93 and: logic .
+   94    | logic . DAMP logic
+
+    DAMP  shift, and go to state 147
+
+    $default  reduce using rule 93 (and)
+
+
+State 91
+
+   95 logic: simple .
+   96      | simple . GT simple
+   97      | simple . GE simple
+   98      | simple . ASGN simple
+   99      | simple . NE simple
+  100      | simple . LE simple
+  101      | simple . LT simple
+  104 simple: simple . condition
+
+    ASGN   shift, and go to state 148
+    GE     shift, and go to state 149
+    GT     shift, and go to state 150
+    LE     shift, and go to state 151
+    LT     shift, and go to state 152
+    MINUS  shift, and go to state 153
+    NE     shift, and go to state 154
+    PLUS   shift, and go to state 155
+
+    $default  reduce using rule 95 (logic)
+
+    condition  go to state 156
+
+
+State 92
+
+   74 while: WHILE LPAREN . exprssion RPAREN statement END
+   75      | WHILE LPAREN . exprssion RPAREN statement stat END
+
+    MINUS   shift, and go to state 84
+    PLUS    shift, and go to state 85
+    ICONST  shift, and go to state 86
+    IDENT   shift, and go to state 87
+
+    exprssion  go to state 157
+    and        go to state 89
+    logic      go to state 90
+    simple     go to state 91
+
+
+State 93
+
+   84 write: WRITE LPAREN . SCONST RPAREN
+
+    SCONST  shift, and go to state 158
+
+
+State 94
+
+  124 recvar: DOT . variable
+  125       | DOT . variable recvar
+
+    IDENT  shift, and go to state 159
+
+    variable  go to state 160
+
+
+State 95
+
+  120 arrayvar: LBRACK . exprssion RBRACK
+  121         | LBRACK . avarcond
+
+    MINUS   shift, and go to state 84
+    PLUS    shift, and go to state 85
+    ICONST  shift, and go to state 86
+    IDENT   shift, and go to state 87
+
+    MINUS     [reduce using rule 123 (avarcond)]
+    PLUS      [reduce using rule 123 (avarcond)]
+    IDENT     [reduce using rule 123 (avarcond)]
+    $default  reduce using rule 123 (avarcond)
+
+    exprssion  go to state 161
+    and        go to state 89
+    logic      go to state 90
+    simple     go to state 91
+    avarcond   go to state 162
+
+
+State 96
+
+   68 subroutinecall: IDENT LPAREN . RPAREN
+   69               | IDENT LPAREN . exprssion RPAREN
+   70               | IDENT LPAREN . exprssion COMMA subroutinecall
+
+    MINUS   shift, and go to state 84
+    PLUS    shift, and go to state 85
+    RPAREN  shift, and go to state 163
+    ICONST  shift, and go to state 86
+    IDENT   shift, and go to state 87
+
+    exprssion  go to state 164
+    and        go to state 89
+    logic      go to state 90
+    simple     go to state 91
+
+
+State 97
+
+  117 variable: IDENT arrayvar .
+  118         | IDENT arrayvar . recvar
+
+    DOT  shift, and go to state 94
+
+    DOT       [reduce using rule 117 (variable)]
+    $default  reduce using rule 117 (variable)
+
+    recvar  go to state 165
+
+
+State 98
+
+  119 variable: IDENT recvar .
+
+    $default  reduce using rule 119 (variable)
+
+
+State 99
+
+   11 body: BEGINN stat END .
+
+    $default  reduce using rule 11 (body)
+
+
+State 100
+
+   10 body: BEGINN statement END .
+
+    $default  reduce using rule 10 (body)
+
+
+State 101
+
+   15 stat: statement stat .
+
+    $default  reduce using rule 15 (stat)
+
+
+State 102
+
+   15 stat: statement . stat
+
+    FOR     shift, and go to state 45
+    IF      shift, and go to state 46
+    READ    shift, and go to state 47
+    RETURN  shift, and go to state 48
+    WHILE   shift, and go to state 49
+    WRITE   shift, and go to state 50
+    IDENT   shift, and go to state 51
+
+    ELSE      reduce using rule 14 (stat)
+    ELSE      [reduce using rule 56 (statement)]
+    ELIF      reduce using rule 14 (stat)
+    ELIF      [reduce using rule 56 (statement)]
+    END       reduce using rule 14 (stat)
+    END       [reduce using rule 56 (statement)]
+    FOR       [reduce using rule 56 (statement)]
+    IF        [reduce using rule 56 (statement)]
+    READ      [reduce using rule 56 (statement)]
+    RETURN    [reduce using rule 56 (statement)]
+    WHILE     [reduce using rule 56 (statement)]
+    WRITE     [reduce using rule 56 (statement)]
+    IDENT     [reduce using rule 56 (statement)]
+    $default  reduce using rule 14 (stat)
+
+    stat            go to state 101
+    statement       go to state 102
+    assignment      go to state 54
+    subroutinecall  go to state 55
+    return          go to state 56
+    for             go to state 57
+    while           go to state 58
+    if              go to state 59
+    write           go to state 60
+    read            go to state 61
+    variable        go to state 62
+
+
+State 103
+
+   85 write: write SCONST . exprloop RPAREN
+
+    COMMA  shift, and go to state 166
+
+    $default  reduce using rule 87 (exprloop)
+
+    exprloop  go to state 167
+
+
+State 104
+
+   67 assignment: variable error . $@10 EQ exprssion
+
+    $default  reduce using rule 66 ($@10)
+
+    $@10  go to state 168
+
+
+State 105
+
+   65 assignment: variable EQ . exprssion
+
+    MINUS   shift, and go to state 84
+    PLUS    shift, and go to state 85
+    ICONST  shift, and go to state 86
+    IDENT   shift, and go to state 87
+
+    exprssion  go to state 169
+    and        go to state 89
+    logic      go to state 90
+    simple     go to state 91
+
+
+State 106
+
+   46 simpleType: simpleType . error $@8 decl_part body
+   55 function: function error $@9 simpleType . decl_part body
+
+    error      shift, and go to state 78
+    FUNCTION   shift, and go to state 7
+    PROCEDURE  shift, and go to state 8
+    IDENT      shift, and go to state 9
+
+    error   [reduce using rule 4 (decl_part)]
+    BEGINN  reduce using rule 4 (decl_part)
+
+    decl_part     go to state 170
+    varaibledecl  go to state 11
+    procedure     go to state 12
+    function      go to state 13
+
+
+State 107
+
+   32 paramter: IDENT . COLON parametertype
+   34         | IDENT . COMMA paramter
+   35         | AMP IDENT . paramter
+
+    AMP        shift, and go to state 65
+    COLON      shift, and go to state 111
+    COMMA      shift, and go to state 112
+    PROCEDURE  shift, and go to state 67
+    IDENT      shift, and go to state 68
+
+    paramter  go to state 171
+
+
+State 108
+
+   33 paramter: AMP paramter .
+   36         | paramter . SEMI paramter
+   39         | paramter . error $@7 RPAREN decl_part body
+
+    error  shift, and go to state 113
+    SEMI   shift, and go to state 115
+
+    error   [reduce using rule 33 (paramter)]
+    RPAREN  reduce using rule 33 (paramter)
+    SEMI    [reduce using rule 33 (paramter)]
+
+
+State 109
+
+   53 function: FUNCTION IDENT LPAREN RPAREN COLON . simpleType decl_part body
+
+    BOOL   shift, and go to state 33
+    FLOAT  shift, and go to state 34
+    INT    shift, and go to state 35
+
+    simpleType  go to state 172
+
+
+State 110
+
+   37 paramter: PROCEDURE IDENT . LPAREN paramter RPAREN decl_part body
+
+    LPAREN  shift, and go to state 173
+
+
+State 111
+
+   32 paramter: IDENT COLON . parametertype
+
+    BOOL   shift, and go to state 33
+    FLOAT  shift, and go to state 34
+    INT    shift, and go to state 35
+    IDENT  shift, and go to state 174
+
+    parametertype  go to state 175
+    simpleType     go to state 176
+
+
+State 112
+
+   34 paramter: IDENT COMMA . paramter
+
+    AMP        shift, and go to state 65
+    PROCEDURE  shift, and go to state 67
+    IDENT      shift, and go to state 68
+
+    paramter  go to state 177
+
+
+State 113
+
+   39 paramter: paramter error . $@7 RPAREN decl_part body
+
+    $default  reduce using rule 38 ($@7)
+
+    $@7  go to state 178
+
+
+State 114
+
+   52 function: FUNCTION IDENT LPAREN paramter RPAREN . COLON simpleType decl_part body
+
+    COLON  shift, and go to state 179
+
+
+State 115
+
+   36 paramter: paramter SEMI . paramter
+
+    AMP        shift, and go to state 65
+    PROCEDURE  shift, and go to state 67
+    IDENT      shift, and go to state 68
+
+    paramter  go to state 180
+
+
+State 116
+
+   30 procedure: PROCEDURE IDENT LPAREN error $@6 . RPAREN decl_part body
+
+    RPAREN  shift, and go to state 181
+
+
+State 117
+
+    7 decl_part: decl_part . error $@2 decl_part body
+   28 procedure: PROCEDURE IDENT LPAREN RPAREN decl_part . body
+
+    error   shift, and go to state 21
+    BEGINN  shift, and go to state 22
+
+    body  go to state 182
+
+
+State 118
+
+   31 procedure: PROCEDURE IDENT LPAREN paramter RPAREN . decl_part body
+
+    FUNCTION   shift, and go to state 7
+    PROCEDURE  shift, and go to state 8
+    IDENT      shift, and go to state 9
+
+    $default  reduce using rule 4 (decl_part)
+
+    decl_part     go to state 183
+    varaibledecl  go to state 11
+    procedure     go to state 12
+    function      go to state 13
+
+
+State 119
+
+   18 varaibledecl: IDENT error $@4 COLON TYPE .
+   27 TYPE: TYPE . error $@5 TYPE
+
+    error  shift, and go to state 77
+
+    error      [reduce using rule 18 (varaibledecl)]
+    BEGINN     reduce using rule 18 (varaibledecl)
+    FUNCTION   reduce using rule 18 (varaibledecl)
+    PROCEDURE  reduce using rule 18 (varaibledecl)
+    IDENT      reduce using rule 18 (varaibledecl)
+
+
+State 120
+
+   47 INDEX: ICONST . COLON ICONST
+   48      | ICONST . COLON ICONST COMMA INDEX
+
+    COLON  shift, and go to state 184
+
+
+State 121
+
+   24 TYPE: ARRAY LBRACK INDEX . RBRACK OF TYPE
+
+    RBRACK  shift, and go to state 185
+
+
+State 122
+
+   49 fieldlist: IDENT COLON . TYPE
+
+    ARRAY   shift, and go to state 32
+    BOOL    shift, and go to state 33
+    FLOAT   shift, and go to state 34
+    INT     shift, and go to state 35
+    RECORD  shift, and go to state 36
+    ICONST  shift, and go to state 37
+    IDENT   shift, and go to state 38
+
+    TYPE        go to state 186
+    simpleType  go to state 40
+
+
+State 123
+
+   50 fieldlist: IDENT COMMA . fieldlist
+
+    IDENT  shift, and go to state 75
+
+    fieldlist  go to state 187
+
+
+State 124
+
+   51 fieldlist: IDENT fieldlist .
+
+    $default  reduce using rule 51 (fieldlist)
+
+
+State 125
+
+   25 TYPE: RECORD fieldlist END .
+
+    $default  reduce using rule 25 (TYPE)
+
+
+State 126
+
+   27 TYPE: TYPE error $@5 . TYPE
+
+    ARRAY   shift, and go to state 32
+    BOOL    shift, and go to state 33
+    FLOAT   shift, and go to state 34
+    INT     shift, and go to state 35
+    RECORD  shift, and go to state 36
+    ICONST  shift, and go to state 37
+    IDENT   shift, and go to state 38
+
+    TYPE        go to state 188
+    simpleType  go to state 40
+
+
+State 127
+
+   46 simpleType: simpleType error $@8 . decl_part body
+
+    FUNCTION   shift, and go to state 7
+    PROCEDURE  shift, and go to state 8
+    IDENT      shift, and go to state 9
+
+    $default  reduce using rule 4 (decl_part)
+
+    decl_part     go to state 189
+    varaibledecl  go to state 11
+    procedure     go to state 12
+    function      go to state 13
+
+
+State 128
+
+    7 decl_part: decl_part error $@2 decl_part body .
+
+    $default  reduce using rule 7 (decl_part)
+
+
+State 129
+
+   13 body: error $@3 statement END .
+
+    $default  reduce using rule 13 (body)
+
+
+State 130
+
+   72 for: FOR IDENT IN . exprssion COLON exprssion statement END
+   73    | FOR IDENT IN . exprssion COLON exprssion statement stat END
+
+    MINUS   shift, and go to state 84
+    PLUS    shift, and go to state 85
+    ICONST  shift, and go to state 86
+    IDENT   shift, and go to state 87
+
+    exprssion  go to state 190
+    and        go to state 89
+    logic      go to state 90
+    simple     go to state 91
+
+
+State 131
+
+   76 if: IF LPAREN exprssion . RPAREN THEN statement END
+   77   | IF LPAREN exprssion . RPAREN THEN statement stat END
+   78   | IF LPAREN exprssion . RPAREN THEN stat elif END
+   79   | IF LPAREN exprssion . RPAREN THEN stat else END
+   80   | IF LPAREN exprssion . RPAREN THEN stat elif else END
+
+    RPAREN  shift, and go to state 191
+
+
+State 132
+
+   88 read: READ LPAREN SCONST . COMMA exprloop RPAREN
+
+    COMMA  shift, and go to state 192
+
+
+State 133
+
+  115 factor: BANG . factor
+
+    BANG    shift, and go to state 133
+    LPAREN  shift, and go to state 134
+    FALSE   shift, and go to state 135
+    TRUE    shift, and go to state 136
+    FCONST  shift, and go to state 137
+    ICONST  shift, and go to state 138
+    IDENT   shift, and go to state 51
+
+    subroutinecall  go to state 139
+    factor          go to state 193
+    variable        go to state 142
+    constant        go to state 143
+
+
+State 134
+
+  114 factor: LPAREN . exprssion RPAREN
+
+    MINUS   shift, and go to state 84
+    PLUS    shift, and go to state 85
+    ICONST  shift, and go to state 86
+    IDENT   shift, and go to state 87
+
+    exprssion  go to state 194
+    and        go to state 89
+    logic      go to state 90
+    simple     go to state 91
+
+
+State 135
+
+  129 constant: FALSE .
+
+    $default  reduce using rule 129 (constant)
+
+
+State 136
+
+  128 constant: TRUE .
+
+    $default  reduce using rule 128 (constant)
+
+
+State 137
+
+  127 constant: FCONST .
+
+    $default  reduce using rule 127 (constant)
+
+
+State 138
+
+  126 constant: ICONST .
+
+    $default  reduce using rule 126 (constant)
+
+
+State 139
+
+  113 factor: subroutinecall .
+
+    $default  reduce using rule 113 (factor)
+
+
+State 140
+
+  103 simple: MINUS term .
+
+    $default  reduce using rule 103 (simple)
+
+
+State 141
+
+  107 term: factor .
+  108     | factor . termcond
+
+    DIV   shift, and go to state 195
+    STAR  shift, and go to state 196
+
+    $default  reduce using rule 107 (term)
+
+    termcond  go to state 197
+
+
+State 142
+
+  112 factor: variable .
+
+    $default  reduce using rule 112 (factor)
+
+
+State 143
+
+  111 factor: constant .
+
+    $default  reduce using rule 111 (factor)
+
+
+State 144
+
+  102 simple: PLUS term .
+
+    $default  reduce using rule 102 (simple)
+
+
+State 145
+
+   92 exprssion: IDENT PLUS . IDENT
+
+    IDENT  shift, and go to state 198
+
+
+State 146
+
+   90 exprssion: and DBAR . and
+
+    MINUS  shift, and go to state 84
+    PLUS   shift, and go to state 85
+
+    and     go to state 199
+    logic   go to state 90
+    simple  go to state 91
+
+
+State 147
+
+   94 and: logic DAMP . logic
+
+    MINUS  shift, and go to state 84
+    PLUS   shift, and go to state 85
+
+    logic   go to state 200
+    simple  go to state 91
+
+
+State 148
+
+   98 logic: simple ASGN . simple
+
+    MINUS  shift, and go to state 84
+    PLUS   shift, and go to state 85
+
+    simple  go to state 201
+
+
+State 149
+
+   97 logic: simple GE . simple
+
+    MINUS  shift, and go to state 84
+    PLUS   shift, and go to state 85
+
+    simple  go to state 202
+
+
+State 150
+
+   96 logic: simple GT . simple
+
+    MINUS  shift, and go to state 84
+    PLUS   shift, and go to state 85
+
+    simple  go to state 203
+
+
+State 151
+
+  100 logic: simple LE . simple
+
+    MINUS  shift, and go to state 84
+    PLUS   shift, and go to state 85
+
+    simple  go to state 204
+
+
+State 152
+
+  101 logic: simple LT . simple
+
+    MINUS  shift, and go to state 84
+    PLUS   shift, and go to state 85
+
+    simple  go to state 205
+
+
+State 153
+
+  106 condition: MINUS . term condition
+
+    BANG    shift, and go to state 133
+    LPAREN  shift, and go to state 134
+    FALSE   shift, and go to state 135
+    TRUE    shift, and go to state 136
+    FCONST  shift, and go to state 137
+    ICONST  shift, and go to state 138
+    IDENT   shift, and go to state 51
+
+    subroutinecall  go to state 139
+    term            go to state 206
+    factor          go to state 141
+    variable        go to state 142
+    constant        go to state 143
+
+
+State 154
+
+   99 logic: simple NE . simple
+
+    MINUS  shift, and go to state 84
+    PLUS   shift, and go to state 85
+
+    simple  go to state 207
+
+
+State 155
+
+  105 condition: PLUS .
+
+    $default  reduce using rule 105 (condition)
+
+
+State 156
+
+  104 simple: simple condition .
+
+    $default  reduce using rule 104 (simple)
+
+
+State 157
+
+   74 while: WHILE LPAREN exprssion . RPAREN statement END
+   75      | WHILE LPAREN exprssion . RPAREN statement stat END
+
+    RPAREN  shift, and go to state 208
+
+
+State 158
+
+   84 write: WRITE LPAREN SCONST . RPAREN
+
+    RPAREN  shift, and go to state 209
+
+
+State 159
+
+  116 variable: IDENT .
+  117         | IDENT . arrayvar
+  118         | IDENT . arrayvar recvar
+  119         | IDENT . recvar
+
+    DOT     shift, and go to state 94
+    LBRACK  shift, and go to state 95
+
+    DOT       [reduce using rule 116 (variable)]
+    $default  reduce using rule 116 (variable)
+
+    arrayvar  go to state 97
+    recvar    go to state 98
+
+
+State 160
+
+  124 recvar: DOT variable .
+  125       | DOT variable . recvar
+
+    DOT  shift, and go to state 94
+
+    DOT       [reduce using rule 124 (recvar)]
+    $default  reduce using rule 124 (recvar)
+
+    recvar  go to state 210
+
+
+State 161
+
+  120 arrayvar: LBRACK exprssion . RBRACK
+  122 avarcond: exprssion . COMMA avarcond
+
+    COMMA   shift, and go to state 211
+    RBRACK  shift, and go to state 212
+
+
+State 162
+
+  121 arrayvar: LBRACK avarcond .
+
+    $default  reduce using rule 121 (arrayvar)
+
+
+State 163
+
+   68 subroutinecall: IDENT LPAREN RPAREN .
+
+    $default  reduce using rule 68 (subroutinecall)
+
+
+State 164
+
+   69 subroutinecall: IDENT LPAREN exprssion . RPAREN
+   70               | IDENT LPAREN exprssion . COMMA subroutinecall
+
+    COMMA   shift, and go to state 213
+    RPAREN  shift, and go to state 214
+
+
+State 165
+
+  118 variable: IDENT arrayvar recvar .
+
+    $default  reduce using rule 118 (variable)
+
+
+State 166
+
+   86 exprloop: COMMA . exprssion exprloop
+
+    MINUS   shift, and go to state 84
+    PLUS    shift, and go to state 85
+    ICONST  shift, and go to state 86
+    IDENT   shift, and go to state 87
+
+    exprssion  go to state 215
+    and        go to state 89
+    logic      go to state 90
+    simple     go to state 91
+
+
+State 167
+
+   85 write: write SCONST exprloop . RPAREN
+
+    RPAREN  shift, and go to state 216
+
+
+State 168
+
+   67 assignment: variable error $@10 . EQ exprssion
+
+    EQ  shift, and go to state 217
+
+
+State 169
+
+   65 assignment: variable EQ exprssion .
+
+    $default  reduce using rule 65 (assignment)
+
+
+State 170
+
+    7 decl_part: decl_part . error $@2 decl_part body
+   55 function: function error $@9 simpleType decl_part . body
+
+    error   shift, and go to state 21
+    BEGINN  shift, and go to state 22
+
+    body  go to state 218
+
+
+State 171
+
+   35 paramter: AMP IDENT paramter .
+   36         | paramter . SEMI paramter
+   39         | paramter . error $@7 RPAREN decl_part body
+
+    error  shift, and go to state 113
+    SEMI   shift, and go to state 115
+
+    error   [reduce using rule 35 (paramter)]
+    RPAREN  reduce using rule 35 (paramter)
+    SEMI    [reduce using rule 35 (paramter)]
+
+
+State 172
+
+   46 simpleType: simpleType . error $@8 decl_part body
+   53 function: FUNCTION IDENT LPAREN RPAREN COLON simpleType . decl_part body
+
+    error      shift, and go to state 78
+    FUNCTION   shift, and go to state 7
+    PROCEDURE  shift, and go to state 8
+    IDENT      shift, and go to state 9
+
+    error   [reduce using rule 4 (decl_part)]
+    BEGINN  reduce using rule 4 (decl_part)
+
+    decl_part     go to state 219
+    varaibledecl  go to state 11
+    procedure     go to state 12
+    function      go to state 13
+
+
+State 173
+
+   37 paramter: PROCEDURE IDENT LPAREN . paramter RPAREN decl_part body
+
+    AMP        shift, and go to state 65
+    PROCEDURE  shift, and go to state 67
+    IDENT      shift, and go to state 68
+
+    paramter  go to state 220
+
+
+State 174
+
+   41 parametertype: IDENT .
+
+    $default  reduce using rule 41 (parametertype)
+
+
+State 175
+
+   32 paramter: IDENT COLON parametertype .
+
+    $default  reduce using rule 32 (paramter)
+
+
+State 176
+
+   40 parametertype: simpleType .
+   46 simpleType: simpleType . error $@8 decl_part body
+
+    error  shift, and go to state 78
+
+    error   [reduce using rule 40 (parametertype)]
+    RPAREN  reduce using rule 40 (parametertype)
+    SEMI    reduce using rule 40 (parametertype)
+
+
+State 177
+
+   34 paramter: IDENT COMMA paramter .
+   36         | paramter . SEMI paramter
+   39         | paramter . error $@7 RPAREN decl_part body
+
+    error  shift, and go to state 113
+    SEMI   shift, and go to state 115
+
+    error   [reduce using rule 34 (paramter)]
+    RPAREN  reduce using rule 34 (paramter)
+    SEMI    [reduce using rule 34 (paramter)]
+
+
+State 178
+
+   39 paramter: paramter error $@7 . RPAREN decl_part body
+
+    RPAREN  shift, and go to state 221
+
+
+State 179
+
+   52 function: FUNCTION IDENT LPAREN paramter RPAREN COLON . simpleType decl_part body
+
+    BOOL   shift, and go to state 33
+    FLOAT  shift, and go to state 34
+    INT    shift, and go to state 35
+
+    simpleType  go to state 222
+
+
+State 180
+
+   36 paramter: paramter . SEMI paramter
+   36         | paramter SEMI paramter .
+   39         | paramter . error $@7 RPAREN decl_part body
+
+    error  shift, and go to state 113
+    SEMI   shift, and go to state 115
+
+    error   [reduce using rule 36 (paramter)]
+    RPAREN  reduce using rule 36 (paramter)
+    SEMI    [reduce using rule 36 (paramter)]
+
+
+State 181
+
+   30 procedure: PROCEDURE IDENT LPAREN error $@6 RPAREN . decl_part body
+
+    FUNCTION   shift, and go to state 7
+    PROCEDURE  shift, and go to state 8
+    IDENT      shift, and go to state 9
+
+    $default  reduce using rule 4 (decl_part)
+
+    decl_part     go to state 223
+    varaibledecl  go to state 11
+    procedure     go to state 12
+    function      go to state 13
+
+
+State 182
+
+   28 procedure: PROCEDURE IDENT LPAREN RPAREN decl_part body .
+
+    $default  reduce using rule 28 (procedure)
+
+
+State 183
+
+    7 decl_part: decl_part . error $@2 decl_part body
+   31 procedure: PROCEDURE IDENT LPAREN paramter RPAREN decl_part . body
+
+    error   shift, and go to state 21
+    BEGINN  shift, and go to state 22
+
+    body  go to state 224
+
+
+State 184
+
+   47 INDEX: ICONST COLON . ICONST
+   48      | ICONST COLON . ICONST COMMA INDEX
+
+    ICONST  shift, and go to state 225
+
+
+State 185
+
+   24 TYPE: ARRAY LBRACK INDEX RBRACK . OF TYPE
+
+    OF  shift, and go to state 226
+
+
+State 186
+
+   27 TYPE: TYPE . error $@5 TYPE
+   49 fieldlist: IDENT COLON TYPE .
+
+    error  shift, and go to state 77
+
+    END  reduce using rule 49 (fieldlist)
+
+
+State 187
+
+   50 fieldlist: IDENT COMMA fieldlist .
+
+    $default  reduce using rule 50 (fieldlist)
+
+
+State 188
+
+   27 TYPE: TYPE . error $@5 TYPE
+   27     | TYPE error $@5 TYPE .
+
+    error  shift, and go to state 77
+
+    error      [reduce using rule 27 (TYPE)]
+    BEGINN     reduce using rule 27 (TYPE)
+    END        reduce using rule 27 (TYPE)
+    FUNCTION   reduce using rule 27 (TYPE)
+    PROCEDURE  reduce using rule 27 (TYPE)
+    IDENT      reduce using rule 27 (TYPE)
+
+
+State 189
+
+    7 decl_part: decl_part . error $@2 decl_part body
+   46 simpleType: simpleType error $@8 decl_part . body
+
+    error   shift, and go to state 21
+    BEGINN  shift, and go to state 22
+
+    body  go to state 227
+
+
+State 190
+
+   72 for: FOR IDENT IN exprssion . COLON exprssion statement END
+   73    | FOR IDENT IN exprssion . COLON exprssion statement stat END
+
+    COLON  shift, and go to state 228
+
+
+State 191
+
+   76 if: IF LPAREN exprssion RPAREN . THEN statement END
+   77   | IF LPAREN exprssion RPAREN . THEN statement stat END
+   78   | IF LPAREN exprssion RPAREN . THEN stat elif END
+   79   | IF LPAREN exprssion RPAREN . THEN stat else END
+   80   | IF LPAREN exprssion RPAREN . THEN stat elif else END
+
+    THEN  shift, and go to state 229
+
+
+State 192
+
+   88 read: READ LPAREN SCONST COMMA . exprloop RPAREN
+
+    COMMA  shift, and go to state 166
+
+    $default  reduce using rule 87 (exprloop)
+
+    exprloop  go to state 230
+
+
+State 193
+
+  115 factor: BANG factor .
+
+    $default  reduce using rule 115 (factor)
+
+
+State 194
+
+  114 factor: LPAREN exprssion . RPAREN
+
+    RPAREN  shift, and go to state 231
+
+
+State 195
+
+  110 termcond: DIV . factor
+
+    BANG    shift, and go to state 133
+    LPAREN  shift, and go to state 134
+    FALSE   shift, and go to state 135
+    TRUE    shift, and go to state 136
+    FCONST  shift, and go to state 137
+    ICONST  shift, and go to state 138
+    IDENT   shift, and go to state 51
+
+    subroutinecall  go to state 139
+    factor          go to state 232
+    variable        go to state 142
+    constant        go to state 143
+
+
+State 196
+
+  109 termcond: STAR . factor
+
+    BANG    shift, and go to state 133
+    LPAREN  shift, and go to state 134
+    FALSE   shift, and go to state 135
+    TRUE    shift, and go to state 136
+    FCONST  shift, and go to state 137
+    ICONST  shift, and go to state 138
+    IDENT   shift, and go to state 51
+
+    subroutinecall  go to state 139
+    factor          go to state 233
+    variable        go to state 142
+    constant        go to state 143
+
+
+State 197
+
+  108 term: factor termcond .
+
+    $default  reduce using rule 108 (term)
+
+
+State 198
+
+   92 exprssion: IDENT PLUS IDENT .
+
+    $default  reduce using rule 92 (exprssion)
+
+
+State 199
+
+   90 exprssion: and DBAR and .
+
+    $default  reduce using rule 90 (exprssion)
+
+
+State 200
+
+   94 and: logic DAMP logic .
+
+    $default  reduce using rule 94 (and)
+
+
+State 201
+
+   98 logic: simple ASGN simple .
+  104 simple: simple . condition
+
+    MINUS  shift, and go to state 153
+    PLUS   shift, and go to state 155
+
+    $default  reduce using rule 98 (logic)
+
+    condition  go to state 156
+
+
+State 202
+
+   97 logic: simple GE simple .
+  104 simple: simple . condition
+
+    MINUS  shift, and go to state 153
+    PLUS   shift, and go to state 155
+
+    $default  reduce using rule 97 (logic)
+
+    condition  go to state 156
+
+
+State 203
+
+   96 logic: simple GT simple .
+  104 simple: simple . condition
+
+    MINUS  shift, and go to state 153
+    PLUS   shift, and go to state 155
+
+    $default  reduce using rule 96 (logic)
+
+    condition  go to state 156
+
+
+State 204
+
+  100 logic: simple LE simple .
+  104 simple: simple . condition
+
+    MINUS  shift, and go to state 153
+    PLUS   shift, and go to state 155
+
+    $default  reduce using rule 100 (logic)
+
+    condition  go to state 156
+
+
+State 205
+
+  101 logic: simple LT simple .
+  104 simple: simple . condition
+
+    MINUS  shift, and go to state 153
+    PLUS   shift, and go to state 155
+
+    $default  reduce using rule 101 (logic)
+
+    condition  go to state 156
+
+
+State 206
+
+  106 condition: MINUS term . condition
+
+    MINUS  shift, and go to state 153
+    PLUS   shift, and go to state 155
+
+    condition  go to state 234
+
+
+State 207
+
+   99 logic: simple NE simple .
+  104 simple: simple . condition
+
+    MINUS  shift, and go to state 153
+    PLUS   shift, and go to state 155
+
+    $default  reduce using rule 99 (logic)
+
+    condition  go to state 156
+
+
+State 208
+
+   74 while: WHILE LPAREN exprssion RPAREN . statement END
+   75      | WHILE LPAREN exprssion RPAREN . statement stat END
+
+    FOR     shift, and go to state 45
+    IF      shift, and go to state 46
+    READ    shift, and go to state 47
+    RETURN  shift, and go to state 48
+    WHILE   shift, and go to state 49
+    WRITE   shift, and go to state 50
+    IDENT   shift, and go to state 51
+
+    FOR       [reduce using rule 56 (statement)]
+    IF        [reduce using rule 56 (statement)]
+    READ      [reduce using rule 56 (statement)]
+    RETURN    [reduce using rule 56 (statement)]
+    WHILE     [reduce using rule 56 (statement)]
+    WRITE     [reduce using rule 56 (statement)]
+    IDENT     [reduce using rule 56 (statement)]
+    $default  reduce using rule 56 (statement)
+
+    statement       go to state 235
+    assignment      go to state 54
+    subroutinecall  go to state 55
+    return          go to state 56
+    for             go to state 57
+    while           go to state 58
+    if              go to state 59
+    write           go to state 60
+    read            go to state 61
+    variable        go to state 62
+
+
+State 209
+
+   84 write: WRITE LPAREN SCONST RPAREN .
+
+    $default  reduce using rule 84 (write)
+
+
+State 210
+
+  125 recvar: DOT variable recvar .
+
+    $default  reduce using rule 125 (recvar)
+
+
+State 211
+
+  122 avarcond: exprssion COMMA . avarcond
+
+    MINUS   shift, and go to state 84
+    PLUS    shift, and go to state 85
+    ICONST  shift, and go to state 86
+    IDENT   shift, and go to state 87
+
+    MINUS     [reduce using rule 123 (avarcond)]
+    PLUS      [reduce using rule 123 (avarcond)]
+    IDENT     [reduce using rule 123 (avarcond)]
+    $default  reduce using rule 123 (avarcond)
+
+    exprssion  go to state 236
+    and        go to state 89
+    logic      go to state 90
+    simple     go to state 91
+    avarcond   go to state 237
+
+
+State 212
+
+  120 arrayvar: LBRACK exprssion RBRACK .
+
+    $default  reduce using rule 120 (arrayvar)
+
+
+State 213
+
+   70 subroutinecall: IDENT LPAREN exprssion COMMA . subroutinecall
+
+    IDENT  shift, and go to state 238
+
+    subroutinecall  go to state 239
+
+
+State 214
+
+   69 subroutinecall: IDENT LPAREN exprssion RPAREN .
+
+    $default  reduce using rule 69 (subroutinecall)
+
+
+State 215
+
+   86 exprloop: COMMA exprssion . exprloop
+
+    COMMA  shift, and go to state 166
+
+    $default  reduce using rule 87 (exprloop)
+
+    exprloop  go to state 240
+
+
+State 216
+
+   85 write: write SCONST exprloop RPAREN .
+
+    $default  reduce using rule 85 (write)
+
+
+State 217
+
+   67 assignment: variable error $@10 EQ . exprssion
+
+    MINUS   shift, and go to state 84
+    PLUS    shift, and go to state 85
+    ICONST  shift, and go to state 86
+    IDENT   shift, and go to state 87
+
+    exprssion  go to state 241
+    and        go to state 89
+    logic      go to state 90
+    simple     go to state 91
+
+
+State 218
+
+   55 function: function error $@9 simpleType decl_part body .
+
+    $default  reduce using rule 55 (function)
+
+
+State 219
+
+    7 decl_part: decl_part . error $@2 decl_part body
+   53 function: FUNCTION IDENT LPAREN RPAREN COLON simpleType decl_part . body
+
+    error   shift, and go to state 21
+    BEGINN  shift, and go to state 22
+
+    body  go to state 242
+
+
+State 220
+
+   36 paramter: paramter . SEMI paramter
+   37         | PROCEDURE IDENT LPAREN paramter . RPAREN decl_part body
+   39         | paramter . error $@7 RPAREN decl_part body
+
+    error   shift, and go to state 113
+    RPAREN  shift, and go to state 243
+    SEMI    shift, and go to state 115
+
+
+State 221
+
+   39 paramter: paramter error $@7 RPAREN . decl_part body
+
+    FUNCTION   shift, and go to state 7
+    PROCEDURE  shift, and go to state 8
+    IDENT      shift, and go to state 9
+
+    $default  reduce using rule 4 (decl_part)
+
+    decl_part     go to state 244
+    varaibledecl  go to state 11
+    procedure     go to state 12
+    function      go to state 13
+
+
+State 222
+
+   46 simpleType: simpleType . error $@8 decl_part body
+   52 function: FUNCTION IDENT LPAREN paramter RPAREN COLON simpleType . decl_part body
+
+    error      shift, and go to state 78
+    FUNCTION   shift, and go to state 7
+    PROCEDURE  shift, and go to state 8
+    IDENT      shift, and go to state 9
+
+    error   [reduce using rule 4 (decl_part)]
+    BEGINN  reduce using rule 4 (decl_part)
+
+    decl_part     go to state 245
+    varaibledecl  go to state 11
+    procedure     go to state 12
+    function      go to state 13
+
+
+State 223
+
+    7 decl_part: decl_part . error $@2 decl_part body
+   30 procedure: PROCEDURE IDENT LPAREN error $@6 RPAREN decl_part . body
+
+    error   shift, and go to state 21
+    BEGINN  shift, and go to state 22
+
+    body  go to state 246
+
+
+State 224
+
+   31 procedure: PROCEDURE IDENT LPAREN paramter RPAREN decl_part body .
+
+    $default  reduce using rule 31 (procedure)
+
+
+State 225
+
+   47 INDEX: ICONST COLON ICONST .
+   48      | ICONST COLON ICONST . COMMA INDEX
+
+    COMMA  shift, and go to state 247
+
+    $default  reduce using rule 47 (INDEX)
+
+
+State 226
+
+   24 TYPE: ARRAY LBRACK INDEX RBRACK OF . TYPE
+
+    ARRAY   shift, and go to state 32
+    BOOL    shift, and go to state 33
+    FLOAT   shift, and go to state 34
+    INT     shift, and go to state 35
+    RECORD  shift, and go to state 36
+    ICONST  shift, and go to state 37
+    IDENT   shift, and go to state 38
+
+    TYPE        go to state 248
+    simpleType  go to state 40
+
+
+State 227
+
+   46 simpleType: simpleType error $@8 decl_part body .
+
+    $default  reduce using rule 46 (simpleType)
+
+
+State 228
+
+   72 for: FOR IDENT IN exprssion COLON . exprssion statement END
+   73    | FOR IDENT IN exprssion COLON . exprssion statement stat END
+
+    MINUS   shift, and go to state 84
+    PLUS    shift, and go to state 85
+    ICONST  shift, and go to state 86
+    IDENT   shift, and go to state 87
+
+    exprssion  go to state 249
+    and        go to state 89
+    logic      go to state 90
+    simple     go to state 91
+
+
+State 229
+
+   76 if: IF LPAREN exprssion RPAREN THEN . statement END
+   77   | IF LPAREN exprssion RPAREN THEN . statement stat END
+   78   | IF LPAREN exprssion RPAREN THEN . stat elif END
+   79   | IF LPAREN exprssion RPAREN THEN . stat else END
+   80   | IF LPAREN exprssion RPAREN THEN . stat elif else END
+
+    FOR     shift, and go to state 45
+    IF      shift, and go to state 46
+    READ    shift, and go to state 47
+    RETURN  shift, and go to state 48
+    WHILE   shift, and go to state 49
+    WRITE   shift, and go to state 50
+    IDENT   shift, and go to state 51
+
+    ELSE      reduce using rule 14 (stat)
+    ELSE      [reduce using rule 56 (statement)]
+    ELIF      reduce using rule 14 (stat)
+    ELIF      [reduce using rule 56 (statement)]
+    END       reduce using rule 56 (statement)
+    FOR       [reduce using rule 56 (statement)]
+    IF        [reduce using rule 56 (statement)]
+    READ      [reduce using rule 56 (statement)]
+    RETURN    [reduce using rule 56 (statement)]
+    WHILE     [reduce using rule 56 (statement)]
+    WRITE     [reduce using rule 56 (statement)]
+    IDENT     [reduce using rule 56 (statement)]
+    $default  reduce using rule 14 (stat)
+
+    stat            go to state 250
+    statement       go to state 251
+    assignment      go to state 54
+    subroutinecall  go to state 55
+    return          go to state 56
+    for             go to state 57
+    while           go to state 58
+    if              go to state 59
+    write           go to state 60
+    read            go to state 61
+    variable        go to state 62
+
+
+State 230
+
+   88 read: READ LPAREN SCONST COMMA exprloop . RPAREN
+
+    RPAREN  shift, and go to state 252
+
+
+State 231
+
+  114 factor: LPAREN exprssion RPAREN .
+
+    $default  reduce using rule 114 (factor)
+
+
+State 232
+
+  110 termcond: DIV factor .
+
+    $default  reduce using rule 110 (termcond)
+
+
+State 233
+
+  109 termcond: STAR factor .
+
+    $default  reduce using rule 109 (termcond)
+
+
+State 234
+
+  106 condition: MINUS term condition .
+
+    $default  reduce using rule 106 (condition)
+
+
+State 235
+
+   74 while: WHILE LPAREN exprssion RPAREN statement . END
+   75      | WHILE LPAREN exprssion RPAREN statement . stat END
+
+    END     shift, and go to state 253
+    FOR     shift, and go to state 45
+    IF      shift, and go to state 46
+    READ    shift, and go to state 47
+    RETURN  shift, and go to state 48
+    WHILE   shift, and go to state 49
+    WRITE   shift, and go to state 50
+    IDENT   shift, and go to state 51
+
+    END     [reduce using rule 14 (stat)]
+    END     [reduce using rule 56 (statement)]
+    FOR     [reduce using rule 56 (statement)]
+    IF      [reduce using rule 56 (statement)]
+    READ    [reduce using rule 56 (statement)]
+    RETURN  [reduce using rule 56 (statement)]
+    WHILE   [reduce using rule 56 (statement)]
+    WRITE   [reduce using rule 56 (statement)]
+    IDENT   [reduce using rule 56 (statement)]
+
+    stat            go to state 254
+    statement       go to state 102
+    assignment      go to state 54
+    subroutinecall  go to state 55
+    return          go to state 56
+    for             go to state 57
+    while           go to state 58
+    if              go to state 59
+    write           go to state 60
+    read            go to state 61
+    variable        go to state 62
+
+
+State 236
+
+  122 avarcond: exprssion . COMMA avarcond
+
+    COMMA  shift, and go to state 211
+
+
+State 237
+
+  122 avarcond: exprssion COMMA avarcond .
+
+    $default  reduce using rule 122 (avarcond)
+
+
+State 238
+
+   68 subroutinecall: IDENT . LPAREN RPAREN
+   69               | IDENT . LPAREN exprssion RPAREN
+   70               | IDENT . LPAREN exprssion COMMA subroutinecall
+
+    LPAREN  shift, and go to state 96
+
+
+State 239
+
+   70 subroutinecall: IDENT LPAREN exprssion COMMA subroutinecall .
+
+    $default  reduce using rule 70 (subroutinecall)
+
+
+State 240
+
+   86 exprloop: COMMA exprssion exprloop .
+
+    $default  reduce using rule 86 (exprloop)
+
+
+State 241
+
+   67 assignment: variable error $@10 EQ exprssion .
+
+    $default  reduce using rule 67 (assignment)
+
+
+State 242
+
+   53 function: FUNCTION IDENT LPAREN RPAREN COLON simpleType decl_part body .
+
+    $default  reduce using rule 53 (function)
+
+
+State 243
+
+   37 paramter: PROCEDURE IDENT LPAREN paramter RPAREN . decl_part body
+
+    FUNCTION   shift, and go to state 7
+    PROCEDURE  shift, and go to state 8
+    IDENT      shift, and go to state 9
+
+    $default  reduce using rule 4 (decl_part)
+
+    decl_part     go to state 255
+    varaibledecl  go to state 11
+    procedure     go to state 12
+    function      go to state 13
+
+
+State 244
+
+    7 decl_part: decl_part . error $@2 decl_part body
+   39 paramter: paramter error $@7 RPAREN decl_part . body
+
+    error   shift, and go to state 21
+    BEGINN  shift, and go to state 22
+
+    body  go to state 256
+
+
+State 245
+
+    7 decl_part: decl_part . error $@2 decl_part body
+   52 function: FUNCTION IDENT LPAREN paramter RPAREN COLON simpleType decl_part . body
+
+    error   shift, and go to state 21
+    BEGINN  shift, and go to state 22
+
+    body  go to state 257
+
+
+State 246
+
+   30 procedure: PROCEDURE IDENT LPAREN error $@6 RPAREN decl_part body .
+
+    $default  reduce using rule 30 (procedure)
+
+
+State 247
+
+   48 INDEX: ICONST COLON ICONST COMMA . INDEX
+
+    ICONST  shift, and go to state 120
+
+    INDEX  go to state 258
+
+
+State 248
+
+   24 TYPE: ARRAY LBRACK INDEX RBRACK OF TYPE .
+   27     | TYPE . error $@5 TYPE
+
+    error  shift, and go to state 77
+
+    error      [reduce using rule 24 (TYPE)]
+    BEGINN     reduce using rule 24 (TYPE)
+    END        reduce using rule 24 (TYPE)
+    FUNCTION   reduce using rule 24 (TYPE)
+    PROCEDURE  reduce using rule 24 (TYPE)
+    IDENT      reduce using rule 24 (TYPE)
+
+
+State 249
+
+   72 for: FOR IDENT IN exprssion COLON exprssion . statement END
+   73    | FOR IDENT IN exprssion COLON exprssion . statement stat END
+
+    FOR     shift, and go to state 45
+    IF      shift, and go to state 46
+    READ    shift, and go to state 47
+    RETURN  shift, and go to state 48
+    WHILE   shift, and go to state 49
+    WRITE   shift, and go to state 50
+    IDENT   shift, and go to state 51
+
+    FOR       [reduce using rule 56 (statement)]
+    IF        [reduce using rule 56 (statement)]
+    READ      [reduce using rule 56 (statement)]
+    RETURN    [reduce using rule 56 (statement)]
+    WHILE     [reduce using rule 56 (statement)]
+    WRITE     [reduce using rule 56 (statement)]
+    IDENT     [reduce using rule 56 (statement)]
+    $default  reduce using rule 56 (statement)
+
+    statement       go to state 259
+    assignment      go to state 54
+    subroutinecall  go to state 55
+    return          go to state 56
+    for             go to state 57
+    while           go to state 58
+    if              go to state 59
+    write           go to state 60
+    read            go to state 61
+    variable        go to state 62
+
+
+State 250
+
+   78 if: IF LPAREN exprssion RPAREN THEN stat . elif END
+   79   | IF LPAREN exprssion RPAREN THEN stat . else END
+   80   | IF LPAREN exprssion RPAREN THEN stat . elif else END
+
+    ELSE  shift, and go to state 260
+    ELIF  shift, and go to state 261
+
+    else  go to state 262
+    elif  go to state 263
+
+
+State 251
+
+   15 stat: statement . stat
+   76 if: IF LPAREN exprssion RPAREN THEN statement . END
+   77   | IF LPAREN exprssion RPAREN THEN statement . stat END
+
+    END     shift, and go to state 264
+    FOR     shift, and go to state 45
+    IF      shift, and go to state 46
+    READ    shift, and go to state 47
+    RETURN  shift, and go to state 48
+    WHILE   shift, and go to state 49
+    WRITE   shift, and go to state 50
+    IDENT   shift, and go to state 51
+
+    ELSE      reduce using rule 14 (stat)
+    ELSE      [reduce using rule 56 (statement)]
+    ELIF      reduce using rule 14 (stat)
+    ELIF      [reduce using rule 56 (statement)]
+    END       [reduce using rule 14 (stat)]
+    END       [reduce using rule 56 (statement)]
+    FOR       [reduce using rule 56 (statement)]
+    IF        [reduce using rule 56 (statement)]
+    READ      [reduce using rule 56 (statement)]
+    RETURN    [reduce using rule 56 (statement)]
+    WHILE     [reduce using rule 56 (statement)]
+    WRITE     [reduce using rule 56 (statement)]
+    IDENT     [reduce using rule 56 (statement)]
+    $default  reduce using rule 14 (stat)
+
+    stat            go to state 265
+    statement       go to state 102
+    assignment      go to state 54
+    subroutinecall  go to state 55
+    return          go to state 56
+    for             go to state 57
+    while           go to state 58
+    if              go to state 59
+    write           go to state 60
+    read            go to state 61
+    variable        go to state 62
+
+
+State 252
+
+   88 read: READ LPAREN SCONST COMMA exprloop RPAREN .
+
+    $default  reduce using rule 88 (read)
+
+
+State 253
+
+   74 while: WHILE LPAREN exprssion RPAREN statement END .
+
+    $default  reduce using rule 74 (while)
+
+
+State 254
+
+   75 while: WHILE LPAREN exprssion RPAREN statement stat . END
+
+    END  shift, and go to state 266
+
+
+State 255
+
+    7 decl_part: decl_part . error $@2 decl_part body
+   37 paramter: PROCEDURE IDENT LPAREN paramter RPAREN decl_part . body
+
+    error   shift, and go to state 21
+    BEGINN  shift, and go to state 22
+
+    body  go to state 267
+
+
+State 256
+
+   39 paramter: paramter error $@7 RPAREN decl_part body .
+
+    $default  reduce using rule 39 (paramter)
+
+
+State 257
+
+   52 function: FUNCTION IDENT LPAREN paramter RPAREN COLON simpleType decl_part body .
+
+    $default  reduce using rule 52 (function)
+
+
+State 258
+
+   48 INDEX: ICONST COLON ICONST COMMA INDEX .
+
+    $default  reduce using rule 48 (INDEX)
+
+
+State 259
+
+   72 for: FOR IDENT IN exprssion COLON exprssion statement . END
+   73    | FOR IDENT IN exprssion COLON exprssion statement . stat END
+
+    END     shift, and go to state 268
+    FOR     shift, and go to state 45
+    IF      shift, and go to state 46
+    READ    shift, and go to state 47
+    RETURN  shift, and go to state 48
+    WHILE   shift, and go to state 49
+    WRITE   shift, and go to state 50
+    IDENT   shift, and go to state 51
+
+    END     [reduce using rule 14 (stat)]
+    END     [reduce using rule 56 (statement)]
+    FOR     [reduce using rule 56 (statement)]
+    IF      [reduce using rule 56 (statement)]
+    READ    [reduce using rule 56 (statement)]
+    RETURN  [reduce using rule 56 (statement)]
+    WHILE   [reduce using rule 56 (statement)]
+    WRITE   [reduce using rule 56 (statement)]
+    IDENT   [reduce using rule 56 (statement)]
+
+    stat            go to state 269
+    statement       go to state 102
+    assignment      go to state 54
+    subroutinecall  go to state 55
+    return          go to state 56
+    for             go to state 57
+    while           go to state 58
+    if              go to state 59
+    write           go to state 60
+    read            go to state 61
+    variable        go to state 62
+
+
+State 260
+
+   81 else: ELSE . stat
+
+    FOR     shift, and go to state 45
+    IF      shift, and go to state 46
+    READ    shift, and go to state 47
+    RETURN  shift, and go to state 48
+    WHILE   shift, and go to state 49
+    WRITE   shift, and go to state 50
+    IDENT   shift, and go to state 51
+
+    END       reduce using rule 14 (stat)
+    END       [reduce using rule 56 (statement)]
+    FOR       [reduce using rule 56 (statement)]
+    IF        [reduce using rule 56 (statement)]
+    READ      [reduce using rule 56 (statement)]
+    RETURN    [reduce using rule 56 (statement)]
+    WHILE     [reduce using rule 56 (statement)]
+    WRITE     [reduce using rule 56 (statement)]
+    IDENT     [reduce using rule 56 (statement)]
+    $default  reduce using rule 14 (stat)
+
+    stat            go to state 270
+    statement       go to state 102
+    assignment      go to state 54
+    subroutinecall  go to state 55
+    return          go to state 56
+    for             go to state 57
+    while           go to state 58
+    if              go to state 59
+    write           go to state 60
+    read            go to state 61
+    variable        go to state 62
+
+
+State 261
+
+   82 elif: ELIF . LPAREN exprssion RPAREN THEN stat
+   83     | ELIF . LPAREN exprssion RPAREN THEN stat elif
+
+    LPAREN  shift, and go to state 271
+
+
+State 262
+
+   79 if: IF LPAREN exprssion RPAREN THEN stat else . END
+
+    END  shift, and go to state 272
+
+
+State 263
+
+   78 if: IF LPAREN exprssion RPAREN THEN stat elif . END
+   80   | IF LPAREN exprssion RPAREN THEN stat elif . else END
+
+    ELSE  shift, and go to state 260
+    END   shift, and go to state 273
+
+    else  go to state 274
+
+
+State 264
+
+   76 if: IF LPAREN exprssion RPAREN THEN statement END .
+
+    $default  reduce using rule 76 (if)
+
+
+State 265
+
+   15 stat: statement stat .
+   77 if: IF LPAREN exprssion RPAREN THEN statement stat . END
+
+    END  shift, and go to state 275
+
+    $default  reduce using rule 15 (stat)
+
+
+State 266
+
+   75 while: WHILE LPAREN exprssion RPAREN statement stat END .
+
+    $default  reduce using rule 75 (while)
+
+
+State 267
+
+   37 paramter: PROCEDURE IDENT LPAREN paramter RPAREN decl_part body .
+
+    $default  reduce using rule 37 (paramter)
+
+
+State 268
+
+   72 for: FOR IDENT IN exprssion COLON exprssion statement END .
+
+    $default  reduce using rule 72 (for)
+
+
+State 269
+
+   73 for: FOR IDENT IN exprssion COLON exprssion statement stat . END
+
+    END  shift, and go to state 276
+
+
+State 270
+
+   81 else: ELSE stat .
+
+    $default  reduce using rule 81 (else)
+
+
+State 271
+
+   82 elif: ELIF LPAREN . exprssion RPAREN THEN stat
+   83     | ELIF LPAREN . exprssion RPAREN THEN stat elif
+
+    MINUS   shift, and go to state 84
+    PLUS    shift, and go to state 85
+    ICONST  shift, and go to state 86
+    IDENT   shift, and go to state 87
+
+    exprssion  go to state 277
+    and        go to state 89
+    logic      go to state 90
+    simple     go to state 91
+
+
+State 272
+
+   79 if: IF LPAREN exprssion RPAREN THEN stat else END .
+
+    $default  reduce using rule 79 (if)
+
+
+State 273
+
+   78 if: IF LPAREN exprssion RPAREN THEN stat elif END .
+
+    $default  reduce using rule 78 (if)
+
+
+State 274
+
+   80 if: IF LPAREN exprssion RPAREN THEN stat elif else . END
+
+    END  shift, and go to state 278
+
+
+State 275
+
+   77 if: IF LPAREN exprssion RPAREN THEN statement stat END .
+
+    $default  reduce using rule 77 (if)
+
+
+State 276
+
+   73 for: FOR IDENT IN exprssion COLON exprssion statement stat END .
+
+    $default  reduce using rule 73 (for)
+
+
+State 277
+
+   82 elif: ELIF LPAREN exprssion . RPAREN THEN stat
+   83     | ELIF LPAREN exprssion . RPAREN THEN stat elif
+
+    RPAREN  shift, and go to state 279
+
+
+State 278
+
+   80 if: IF LPAREN exprssion RPAREN THEN stat elif else END .
+
+    $default  reduce using rule 80 (if)
+
+
+State 279
+
+   82 elif: ELIF LPAREN exprssion RPAREN . THEN stat
+   83     | ELIF LPAREN exprssion RPAREN . THEN stat elif
+
+    THEN  shift, and go to state 280
+
+
+State 280
+
+   82 elif: ELIF LPAREN exprssion RPAREN THEN . stat
+   83     | ELIF LPAREN exprssion RPAREN THEN . stat elif
+
+    FOR     shift, and go to state 45
+    IF      shift, and go to state 46
+    READ    shift, and go to state 47
+    RETURN  shift, and go to state 48
+    WHILE   shift, and go to state 49
+    WRITE   shift, and go to state 50
+    IDENT   shift, and go to state 51
+
+    ELSE      reduce using rule 14 (stat)
+    ELSE      [reduce using rule 56 (statement)]
+    ELIF      reduce using rule 14 (stat)
+    ELIF      [reduce using rule 56 (statement)]
+    END       reduce using rule 14 (stat)
+    END       [reduce using rule 56 (statement)]
+    FOR       [reduce using rule 56 (statement)]
+    IF        [reduce using rule 56 (statement)]
+    READ      [reduce using rule 56 (statement)]
+    RETURN    [reduce using rule 56 (statement)]
+    WHILE     [reduce using rule 56 (statement)]
+    WRITE     [reduce using rule 56 (statement)]
+    IDENT     [reduce using rule 56 (statement)]
+    $default  reduce using rule 14 (stat)
+
+    stat            go to state 281
+    statement       go to state 102
+    assignment      go to state 54
+    subroutinecall  go to state 55
+    return          go to state 56
+    for             go to state 57
+    while           go to state 58
+    if              go to state 59
+    write           go to state 60
+    read            go to state 61
+    variable        go to state 62
+
+
+State 281
+
+   82 elif: ELIF LPAREN exprssion RPAREN THEN stat .
+   83     | ELIF LPAREN exprssion RPAREN THEN stat . elif
+
+    ELIF  shift, and go to state 261
+
+    $default  reduce using rule 82 (elif)
+
+    elif  go to state 282
+
+
+State 282
+
+   83 elif: ELIF LPAREN exprssion RPAREN THEN stat elif .
+
+    $default  reduce using rule 83 (elif)

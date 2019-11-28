@@ -1,0 +1,5 @@
+export PATH=$PATH:/home/pyoon/flex/bin
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/home/pyoon/flex/lib
+export PATH=$PATH:/home/pyoon/bison/bin
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/home/pyoon/bison/lib
+export PATH=$PATH:/home/pyoon/smlnj/bin

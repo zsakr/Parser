@@ -1,0 +1,109 @@
+
+INDEX 			: INT COLON INT 
+				| INT COLON INT COMMA INDEX
+				;
+				        
+fieldlist		: IDENT COLON TYPE 
+				| IDENT COMMA fieldlist
+				| IDENT fieldlist
+				;
+
+function		: FUNCTION IDENT LPAREN paramter RPAREN COLON simpleType decl_part body
+				| FUNCTION IDENT LPAREN paramter function 
+			    ;		        
+			   
+statement 		:
+				| assignment 
+				| subroutinecall 
+				| return 
+				| for 
+				| while 
+				
+				| read 
+				| write 
+				;
+				
+assignment     	: variable EQ exprssion
+				;
+
+subroutinecall	: IDENT LPAREN RPAREN
+				| IDENT LPAREN exprssion RPAREN
+				| IDENT LPAREN exprssion COMMA subroutinecall
+				;
+
+return 			: RETURN exprssion
+				;
+
+for				: FOR IDENT IN exprssion COLON exprssion statement END
+				| FOR IDENT IN exprssion COLON exprssion statement for
+				;
+while			: WHILE LPAREN exprssion RPAREN statement END
+				| WHILE LPAREN exprssion RPAREN statement while
+				;								
+
+write			: WRITE LPAREN SCONST RPAREN
+				| WRITE LPAREN SCONST COMMA exprssion RPAREN
+				| WRITE LPAREN SCONST COMMA exprssion 
+				;				
+				
+read 			: READ LPAREN SCONST COMMA exprssion RPAREN	
+				| READ LPAREN SCONST RPAREN
+				;		
+
+exprssion       : and 
+				| and DBAR and 
+				;
+				
+and             : logic 
+				| logic DAMP logic 
+				;					 												   
+
+logic			: simple 
+				| simple GT | GE | ASGN| NE | LE | LT simple 
+				;
+
+simple          : PLUS | MINUS term 
+				| simple PLUS | MINUS term condition 
+				;
+				
+condition 		: PLUS | MINUS term condition
+				;
+
+term           : factor 
+			   | factor termcond
+			   ;				
+
+termcond       :STAR | DIV factor 
+			   ;	
+
+factor 			: constant
+				| variable
+				| subroutinecall
+				| LPAREN exprssion RPAREN
+				| BANG factor 
+				;
+				
+variable 		: IDENT
+				| IDENT arrayvar
+				| IDENT arrayvar recvar
+				| IDENT recvar
+				;
+				
+arrayvar 		: RBRACK exprssion LBRACK
+				| RBRACK avarcond	
+				;	
+						 							   										
+avarcond       : exprssion COMMA avarcond
+			   | 
+			   ;
+			   
+			   
+recvar			: DOT variable
+			    | DOT variable recvar
+			    ;			   
+
+constant       : ICONST
+			   | FCONST
+			   | TRUE
+			   | FALSE
+			   ;	

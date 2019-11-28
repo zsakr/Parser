@@ -1,0 +1,46 @@
+ /*
+ * README file
+ *
+ * Ziad Sakr
+ * Department of Computer Science
+ * Trinity College 
+ *
+ * Date: 
+ * 10-16-2019
+ */
+ My parser can parse comments, variable declration, variable assignments to a single identifier  or to a number or to an Identifier plus identifier. It can also parse procedures and the function syntax. it can parse multiple variable declrations and arrays. it also can parse keywords upper and lower case.
+ For handlng errors my parser can handle varibale decleration errors, missing colon, missing types in decleration parts for example missing int keyword or begin statement will result as missing type, error in body will result as missing end statement or begin.
+ 
+ 
+ for example this is an example file including everything I can parse
+ /* test0.pm -- testing elementary statements and return values from a 
+ *              a function
+ */
+
+program test0
+    
+    f : int
+    x : int
+    y : int
+    z : int
+
+       procedure p(c, &d, e : int) 
+     begin
+        
+            b = 3
+            d = c + b
+            c = d  + z
+        end
+        
+    function q(e, f : int): int
+        a, b, i : int
+        c : array[1:10] of int
+        begin
+            a = 0         
+                    
+        end
+  begin                              
+ x = 1
+    y = 11
+    z = 34
+    end

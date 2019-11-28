@@ -1,0 +1,31 @@
+/* test0.pm -- testing elementary statements and return values from a 
+ *              a function
+ */
+
+program test0
+    
+    f : int
+    x : int
+    y : int
+    z : int
+
+       procedure p(c, &d, e : int)
+     
+        
+            b = 3
+            d = c + b
+            c = d  + z
+        end
+        
+    function q(e, f : int): int
+        a, b, i : int
+        c : array[1:10] of int
+        begin
+            a = 0         
+                    
+        end
+  begin                              
+ x = 1
+    y = 11
+    z = 34
+    end
